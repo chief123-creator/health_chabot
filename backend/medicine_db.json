@@ -1,0 +1,20 @@
+{
+  "Flu": {
+    "name": "Paracetamol 500mg",
+    "uses": ["Fever", "Body pain", "Headache"],
+    "dosage": "1 tablet 3 times daily after meals (max 3 days)",
+    "warning": "Do not exceed 4g per day. Avoid alcohol. Consult a doctor if fever lasts more than 3 days."
+  },
+  "Migraine": {
+    "name": "Sumatriptan 50mg",
+    "uses": ["Migraine attacks"],
+    "dosage": "1 tablet at onset of headache (max 2 tablets per day)",
+    "warning": "Not recommended for patients with heart disease. Consult a neurologist."
+  },
+  "Gastritis": {
+    "name": "Pantoprazole 40mg",
+    "uses": ["Acidity", "Gastritis", "Heartburn"],
+    "dosage": "1 tablet once daily before breakfast",
+    "warning": "Do not use long term without medical supervision."
+  }
+}
