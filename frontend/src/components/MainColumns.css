@@ -1,0 +1,107 @@
+/* src/components/MainColumns.css */
+.columns-page {
+  width: 100%;
+  max-width: 100%;
+  color: white;
+}
+
+.columns-page h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+}
+
+.columns-subtitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+/* Responsive grid - Desktop/Laptop: 3-4 columns based on screen size */
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* Each card with consistent styling */
+.columns-card {
+  background: rgba(255, 255, 255, 0.97);
+  color: #111827;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-left: 4px solid #6366f1;
+  font-size: 0.9rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.columns-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.columns-card .index {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #312e81;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.columns-card .label {
+  flex: 1;
+  word-wrap: break-word;
+}
+
+/* Laptop screens (1366px-1440px) - 3 columns */
+@media (max-width: 1440px) {
+  .columns-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.875rem;
+  }
+}
+
+/* Smaller laptops/tablets - 2 columns */
+@media (max-width: 1024px) {
+  .columns-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .columns-page h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Mobile - 1 column */
+@media (max-width: 768px) {
+  .columns-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .columns-page h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .columns-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .columns-card {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,81 @@
+/* src/components/ColumnsOverview.css */
+.columns-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  color: white;
+}
+
+.columns-page h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.columns-subtitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.columns-section {
+  background: rgba(255, 255, 255, 0.97);
+  color: #1f2933;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+.columns-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.columns-header h3 {
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.pill {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.75rem;
+}
+
+.columns-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid #6366f1;
+  font-size: 0.9rem;
+}
+
+.columns-card .index {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #312e81;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.columns-card .label {
+  flex: 1;
+}
