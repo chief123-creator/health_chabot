@@ -1,19 +1,33 @@
-# ml_model.py
+import os
+import joblib
+from typing import Any
+
+BASE_DIR = os.path.dirname(__file__)
+MODEL_PATH = os.path.join(BASE_DIR, "models", "uses_model.pkl")
+
+_model: Any = None
+
+def _load_model():
+    global _model
+    if _model is not None:
+        return
+    if not os.path.exists(MODEL_PATH):
+        raise FileNotFoundError(
+            f"ML model file not found at {MODEL_PATH}. "
+            "Train it first with train_uses_model.py."
+        )
+    _model = joblib.load(MODEL_PATH)
 
 def predict_disease(symptoms_text: str) -> str:
     """
-    Very simple rule-based predictor for now.
-    Later you will replace this with a trained ML model.
+    Returns a uses_label like 'Treatment of Bacterial infections'
+    based on user symptoms text.
     """
-    text = symptoms_text.lower()
+    _load_model()
 
-    if any(x in text for x in ["fever", "body pain", "chills"]) and "cough" in text:
-        return "Flu"
-    if any(x in text for x in ["runny nose", "sneeze", "sneezing", "blocked nose", "cold"]):
-        return "Common Cold"
-    if any(x in text for x in ["one sided headache", "migraine", "throbbing", "light sensitivity"]):
-        return "Migraine"
-    if any(x in text for x in ["acidity", "burning", "stomach pain", "gastric", "gastritis"]):
-        return "Gastritis"
+    text = (symptoms_text or "").strip()
+    if not text:
+        return "Unknown"
 
-    return "Common Cold"
+    pred = _model.predict([text])[0]
+    return str(pred)

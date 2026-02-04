@@ -1,41 +1,35 @@
-// src/App.tsx
-import React from 'react';
-import type { JSX } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import MedicineSearch from './components/MedicineSearch';
-import Chatbot from './components/Chatbot';
-import ColumnsOverview from './components/MainColumns';
-import './App.css';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Symptoms from "./pages/Symptoms";
+import Medicine from "./pages/Medicine";
+import Chat from "./pages/Chat";
+import About from "./pages/About";
+import NotFound from "./pages/NotFound";
 
-function App(): JSX.Element {
-  return (
-    <Router>
-      <div className="app">
-        <nav className="navbar">
-          <h1>MediSearch AI</h1>
-          <div className="nav-links">
-            <Link to="/">Medicine Search</Link>
-            <Link to="/medicine-info">Medicine Information</Link>
-            <Link to="/chatbot">Health Chatbot</Link>
-            <Link to="/ui">UI / User Interaction</Link>
-          </div>
-        </nav>
+const queryClient = new QueryClient();
 
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<MedicineSearch />} />
-            <Route path="/chatbot" element={<Chatbot />} />
-            <Route path="/medicine-info" element={<ColumnsOverview section="medicineInfo" />} />
-            <Route path="/ui" element={<ColumnsOverview section="ui" />} />
-          </Routes>
-        </main>
-
-        <footer className="disclaimer">
-          Educational project only. Not medical advice. Consult a doctor.
-        </footer>
-      </div>
-    </Router>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/symptoms" element={<Symptoms />} />
+          <Route path="/medicine" element={<Medicine />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/about" element={<About />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

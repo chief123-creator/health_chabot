@@ -3,53 +3,81 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 from pathlib import Path
-from sqlalchemy import create_engine, Column, Integer, String, Text, DECIMAL
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from ml_model import predict_disease
 from urllib.parse import quote_plus
 from PIL import Image
 import pytesseract
 import io
+from ml_model import predict_disease
+
+
+   # NOTE: jahan pe tera model hai
+from medicine_model import MedicineModel, Base  # NEW: model alag file mein
+from services.medicine_service import search_by_uses  # NEW: service layer
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": False
+    }
+})
 
-
-#image reader model 
-
-
-# Load medicine database
+# --------- (OPTIONAL) JSON TEST DB (ab use nahi kar rahe) ----------
 MED_DB_PATH = Path(__file__).with_name("medicine_db.json")
 with open(MED_DB_PATH, "r", encoding="utf-8") as f:
     MEDICINE_DB = json.load(f)
+# -------------------------------------------------------------------
 
-
-@app.route("/predict", methods=["POST"])
+@app.route("/search-medicine", methods=["POST", "OPTIONS"])
 def predict():
     """
     Expected JSON body: { "symptoms": "fever cough headache" }
+    Returns disease + medicines info from MySQL + disclaimer.
     """
-    data = request.get_json(force=True)
-    symptoms_text = data.get("symptoms", "")
+    if request.method == "OPTIONS":
+        return "", 200
+    
+    try:
+        data = request.get_json(force=True)
+        symptoms_text = data.get("symptoms", "")
 
-    if not symptoms_text.strip():
-        return jsonify({"error": "symptoms field is required"}), 400
+        if not symptoms_text.strip():
+            return jsonify({"error": "symptoms field is required"}), 400
 
-    disease = predict_disease(symptoms_text)
-    med_info = MEDICINE_DB.get(disease)
+        # 1) predict disease using your ML model
+        disease = predict_disease(symptoms_text)
 
-    response = {
-        "disease": disease,
-        "medicine": med_info,
-        "disclaimer": "This is an educational tool, not medical advice. Always consult a qualified doctor."
-    }
-    return jsonify(response)
+        db = SessionLocal()
+        try:
+            # 2) use your new logic: search by `uses` column
+            medicines = search_by_uses(disease, db)
+
+            return jsonify({
+                "disease": disease,
+                "medicines": medicines,   # array of medicines
+                "disclaimer": "This is an educational tool, not medical advice. Always consult a qualified doctor."
+            }), 200
+
+        except Exception as e:
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+        finally:
+            db.close()
+    
+    except Exception as e:
+        return jsonify({"error": f"Request error: {str(e)}"}), 400
 
 
 @app.route("/", methods=["GET"])
 def health_check():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok"}), 200
 
+
+# Database Configuration
 DB_USER = "root"
 DB_PASS = quote_plus("Prince@2307")
 DB_HOST = "127.0.0.1"
@@ -59,30 +87,9 @@ DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}?charset
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base = declarative_base()
 
-# 👉 ADD THIS BLOCK
-class MedicineModel(Base):
-    __tablename__ = "medicines"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), index=True)
-    price_rupee = Column("price", DECIMAL(10, 2))          # maps to `price` column
-    manufacturer_name = Column(String(255))
-    type = Column(String(100))
-    pack_size_label = Column(String(100))
-    substitute0 = Column(String(255))
-    substitute1 = Column(String(255))
-    substitute2 = Column(String(255))
-    substitute3 = Column(String(255))
-    substitute4 = Column(String(255))
-    Consolidated_Side_Effects = Column(Text)
-    Chemical_Class = Column("Chemical Class", String(255))       # column with space
-    Therapeutic_Class = Column("Therapeutic Class", String(255)) # column with space
-    image_url = Column(Text)
-    composition = Column(Text)
-    uses = Column(Text)
-@app.route("/api/search-medicine", methods=["POST"])
+@app.route("/api/search-medicine", methods=["POST", "OPTIONS"])
 def search_medicine():
     """
     Accepts:
@@ -150,7 +157,6 @@ def search_medicine():
 
 def ocr_extract_name(file_storage) -> str | None:
     """Read uploaded image and try to extract a medicine name."""
-    # read file into memory
     img_bytes = file_storage.read()
     try:
         img = Image.open(io.BytesIO(img_bytes))
@@ -158,14 +164,21 @@ def ocr_extract_name(file_storage) -> str | None:
         return None
 
     text = pytesseract.image_to_string(img)
-    # simple cleanup: keep only letters/numbers/spaces
     cleaned = "".join(ch if ch.isalnum() or ch.isspace() else " " for ch in text)
     tokens = cleaned.split()
     return tokens[0] if tokens else None
 
 
-
 if __name__ == "__main__":
-    # change port if 5000 blocked: app.run(port=8000)
     app.run(host="0.0.0.0", port=8000, debug=True)
 
+
+#only for test 
+@app.route("/__debug/routes")
+def debug_routes():
+    return {
+        "routes": [str(rule) for rule in app.url_map.iter_rules()]
+    }
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, debug=True)
